@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pie_slider/main/bloc/bloc.dart';
 
-const int NUM_PIES = 30;
+const NUM_PIES = 29;
+const double TOTAL_VALUE_CHART = 1000000.0;
 
 class MainPage extends StatefulWidget {
   @override
@@ -42,25 +43,17 @@ class _MainPageState extends State<MainPage> {
                 builder: (_, state) {
                   return GridView.count(
                     crossAxisCount: 5,
-                    children: List.generate(
-                      30,
-                      (idx) => charts.PieChart(
+                    children: List.generate(NUM_PIES + 1 , (idx) {
+                      final val1 = (state.counter * (NUM_PIES - idx) / NUM_PIES + (1 - state.counter) * idx / NUM_PIES) * TOTAL_VALUE_CHART;
+                      return charts.PieChart(
                         [
                           charts.Series<LinearSales, int>(
                             id: 'Sales',
                             domainFn: (LinearSales sales, _) => sales.year,
                             measureFn: (LinearSales sales, _) => sales.sales,
                             data: [
-                              new LinearSales(
-                                  0,
-                                  (state.counter * (NUM_PIES - idx) / NUM_PIES + (300 - state.counter) * idx / NUM_PIES)
-                                      .round()),
-                              new LinearSales(
-                                  1,
-                                  300 -
-                                      (state.counter * (NUM_PIES - idx) / NUM_PIES +
-                                              (300 - state.counter) * idx / NUM_PIES)
-                                          .round()),
+                              LinearSales(0, val1),
+                              LinearSales(1, TOTAL_VALUE_CHART - val1),
                             ],
                           ),
                         ],
@@ -70,8 +63,8 @@ class _MainPageState extends State<MainPage> {
                             charts.ArcLabelDecorator(labelPosition: charts.ArcLabelPosition.auto)
                           ],
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   );
                 },
               ),
@@ -114,7 +107,7 @@ class _StatefulSliderState extends State<StatefulSlider> {
   Widget build(BuildContext context) {
     return Slider(
       min: 0,
-      max: 300,
+      max: 1,
       value: _val,
       onChanged: (val) => newValue(val),
     );
@@ -124,7 +117,7 @@ class _StatefulSliderState extends State<StatefulSlider> {
 /// Sample linear data type.
 class LinearSales {
   final int year;
-  final int sales;
+  final double sales;
 
   LinearSales(this.year, this.sales);
 }
